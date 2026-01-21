@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKIF MIRZA RTA</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #000000; 
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+            touch-action: none;
+        }
+
+        #greeting-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(ellipse at center, #0a0a1a 0%, #000000 100%);
+            color: white;
+            z-index: 10;
+            transition: opacity 0.8s ease;
+            padding: 20px;
+        }
+
+        #greeting-screen h1 { 
+            font-size: clamp(2rem, 8vw, 4rem);
+            margin-bottom: 3rem; 
+            text-align: center;
+            font-weight: 900;
+            letter-spacing: clamp(3px, 1vw, 8px);
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s ease infinite, fadeInDown 1s ease;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to { 
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.5),
+                            0 0 40px rgba(0, 255, 255, 0.3),
+                            inset 0 0 20px rgba(0, 255, 255, 0.2);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(255, 0, 255, 0.6),
+                            0 0 60px rgba(255, 0, 255, 0.4),
+                            inset 0 0 30px rgba(255, 0, 255, 0.3);
+            }
+        }
+
+        #continue-btn {
+            padding: clamp(15px, 3vw, 20px) clamp(30px, 8vw, 50px);
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            cursor: pointer;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border: none;
+            color: white;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: clamp(1px, 0.5vw, 3px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: fadeIn 1s ease 0.5s forwards, pulse 2s ease 0.5s infinite, glow 3s ease 0.5s infinite;
+        }
+
+        #continue-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        #continue-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.6);
+        }
+
+        #continue-btn:active {
+            transform: translateY(-1px);
+        }
+
+        @media (hover: none) {
+            #continue-btn:hover {
+                transform: none;
+            }
+        }
+
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            display: none;
+            animation: fadeIn 1s ease;
+            z-index: 5;
+        }
+
+        #ui-overlay.fade-out {
+            animation: fadeOut 0.8s ease forwards;
+        }
+
+        .controls-info {
+            background: rgba(0, 0, 0, 0.8);
+            padding: clamp(10px, 2vw, 15px) clamp(20px, 4vw, 30px);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .controls-info p {
+            color: #00ffff;
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            margin: 5px 0;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .controls-info p span {
+            color: #ff00ff;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .controls-info p {
+                font-size: 0.75rem;
+            }
+
+            .controls-info {
+                padding: 8px 15px;
+            }
+        }
+
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-top: 3px solid #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #loading-screen p {
+            color: #00ffff;
+            margin-top: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+    </style>
+</head>
+<body>
+    <div id="greeting-screen">
+        <h1>AKIF MIRZA RTA</h1>
+        <button id="continue-btn">Click to Continue...</button>
+    </div>
+
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <p>Loading Assets...</p>
+    </div>
+
+    <div id="ui-overlay">
+        <div class="controls-info">
+            <p><span>LEFT CLICK + DRAG</span> - Rotate</p>
+            <p><span>RIGHT CLICK + DRAG</span> - Pan</p>
+            <p><span>SCROLL</span> - Zoom</p>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let scene, camera, renderer, controls, poster, stars;
+        let isAnimatingCamera = false;
+
+        const createStarfield = () => {
+            const starGeometry = new THREE.BufferGeometry();
+            const starCount = 800; // Reduced from 5000 to 800
+            const positions = new Float32Array(starCount * 3);
+            const colors = new Float32Array(starCount * 3);
+
+            for (let i = 0; i < starCount * 3; i += 3) {
+                const radius = Math.random() * 500 + 150; // Start further out
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(Math.random() * 2 - 1);
+
+                positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i + 2] = radius * Math.cos(phi);
+
+                const colorChoice = Math.random();
+                if (colorChoice < 0.8) {
+                    colors[i] = 1; colors[i + 1] = 1; colors[i + 2] = 1; // More white stars
+                } else if (colorChoice < 0.9) {
+                    colors[i] = 0.5; colors[i + 1] = 1; colors[i + 2] = 1;
+                } else {
+                    colors[i] = 1; colors[i + 1] = 0.5; colors[i + 2] = 1;
+                }
+            }
+
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const starMaterial = new THREE.PointsMaterial({
+                size: 1.5, // Smaller stars
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6, // More transparent
+                sizeAttenuation: true
+            });
+
+            return new THREE.Points(starGeometry, starMaterial);
+        };
+
+        const animateCameraFlyIn = () => {
+            isAnimatingCamera = true;
+
+            // Start position - far away and slightly angled
+            camera.position.set(15, 8, 20);
+            camera.lookAt(0, 0, 0);
+
+            // Target position
+            const targetPos = { x: 0, y: 0, z: 5 };
+            const startPos = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+
+            const duration = 3000; // 3 seconds
+            const startTime = Date.now();
+
+            const animate = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Easing function (ease-out cubic)
+                const eased = 1 - Math.pow(1 - progress, 3);
+
+                camera.position.x = startPos.x + (targetPos.x - startPos.x) * eased;
+                camera.position.y = startPos.y + (targetPos.y - startPos.y) * eased;
+                camera.position.z = startPos.z + (targetPos.z - startPos.z) * eased;
+
+                camera.lookAt(0, 0, 0);
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isAnimatingCamera = false;
+                    controls.enabled = true;
+                }
+            };
+
+            animate();
+        };
+
+        const init = () => {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            scene.fog = new THREE.FogExp2(0x000510, 0.0008); // Reduced fog for less obstruction
+
+            camera = new THREE.PerspectiveCamera(
+                75, 
+                window.innerWidth / window.innerHeight, 
+                0.1, 
+                1000
+            );
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.outputColorSpace = THREE.SRGBColorSpace; // Ensure proper color space
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+            document.body.appendChild(renderer.domElement);
+
+            // Add starfield
+            stars = createStarfield();
+            scene.add(stars);
+
+            // Balanced lighting for original colors
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+
+            // Main front light - neutral white
+            const frontLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            frontLight.position.set(0, 2, 8);
+            scene.add(frontLight);
+
+            // Back light for depth - neutral white
+            const backLight = new THREE.DirectionalLight(0xffffff, 0.7);
+            backLight.position.set(0, 0, -8);
+            scene.add(backLight);
+
+            // Very subtle accent lights (won't affect color much)
+            const accentLight1 = new THREE.PointLight(0x00ffff, 0.15, 30);
+            accentLight1.position.set(8, 5, 5);
+            scene.add(accentLight1);
+
+            const accentLight2 = new THREE.PointLight(0xff00ff, 0.15, 30);
+            accentLight2.position.set(-8, -5, 5);
+            scene.add(accentLight2);
+
+            const textureLoader = new THREE.TextureLoader();
+
+            // Show loading screen
+            document.getElementById('loading-screen').style.opacity = '1';
+            document.getElementById('loading-screen').style.pointerEvents = 'auto';
+
+            Promise.all([
+                textureLoader.loadAsync('attached_assets/1_1769005728416.png'),
+                textureLoader.loadAsync('attached_assets/2_1769005728422.png')
+            ]).then(([textureFront, textureBack]) => {
+                // Ensure textures use sRGB color space for accurate colors
+                textureFront.colorSpace = THREE.SRGBColorSpace;
+                textureBack.colorSpace = THREE.SRGBColorSpace;
+
+                // Hide loading screen
+                document.getElementById('loading-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading-screen').style.pointerEvents = 'none';
+                }, 300);
+
+                // Poster geometry
+                const geometry = new THREE.BoxGeometry(3, 3 * 1.414, 0.05);
+
+                // Side material - subtle white edges
+                const sideMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0xffffff,
+                    metalness: 0.2,
+                    roughness: 0.6
+                });
+
+                const materials = [
+                    sideMaterial, // right
+                    sideMaterial, // left
+                    sideMaterial, // top
+                    sideMaterial, // bottom
+                    new THREE.MeshStandardMaterial({ 
+                        map: textureFront,
+                        metalness: 0,
+                        roughness: 1.0,
+                        side: THREE.FrontSide
+                    }), // front
+                    new THREE.MeshStandardMaterial({ 
+                        map: textureBack,
+                        metalness: 0,
+                        roughness: 1.0,
+                        side: THREE.FrontSide
+                    })  // back
+                ];
+
+                poster = new THREE.Mesh(geometry, materials);
+                scene.add(poster);
+
+                // Start camera fly-in animation
+                animateCameraFlyIn();
+            }).catch(error => {
+                console.error('Error loading textures:', error);
+                document.getElementById('loading-screen').innerHTML = '<p style="color: #ff0000;">Error loading assets. Please refresh.</p>';
+            });
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 1;
+            controls.maxDistance = 20;
+            controls.enablePan = true;
+            controls.enabled = false; // Disable during fly-in animation
+
+            // Better touch controls for mobile
+            controls.touches = {
+                ONE: THREE.TOUCH.ROTATE,
+                TWO: THREE.TOUCH.DOLLY_PAN
+            };
+
+            // Auto-hide hint after 5 seconds
+            setTimeout(() => {
+                const uiOverlay = document.getElementById('ui-overlay');
+                if (uiOverlay) {
+                    uiOverlay.classList.add('fade-out');
+                    setTimeout(() => {
+                        uiOverlay.style.display = 'none';
+                    }, 800);
+                }
+            }, 5000);
+
+            window.addEventListener('resize', onWindowResize, false);
+            animate();
+        };
+
+        const onWindowResize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        };
+
+        const animate = () => {
+            requestAnimationFrame(animate);
+
+            // Slowly rotate starfield
+            if (stars) {
+                stars.rotation.y += 0.0001;
+                stars.rotation.x += 0.00005;
+            }
+
+            if (!isAnimatingCamera) {
+                controls.update();
+            }
+
+            renderer.render(scene, camera);
+        };
+
+        document.getElementById('continue-btn').addEventListener('click', () => {
+            document.getElementById('greeting-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('greeting-screen').style.display = 'none';
+                document.getElementById('ui-overlay').style.display = 'block';
+                init();
+            }, 800);
+        });
+    </script>
+</body>
+</html>
